@@ -75,7 +75,7 @@ public class TransactionController {
     
             return ResponseEntity.badRequest().body(response);
         }
-        // Update From transaction 
+        // Update transaction of user making the transafer 
             Transaction transaction_from = new Transaction();
           
             transaction_from.setReference("DEBIT"+reference);
@@ -86,6 +86,7 @@ public class TransactionController {
 
             transactionService.save(transaction_from);
 
+        // Update transaction of user recieving the transafer 
             Transaction transaction_to = new Transaction();
 
             transaction_to.setReference("CREDIT"+reference);
@@ -95,12 +96,14 @@ public class TransactionController {
             transaction_to.setAccountNumber(to_account);
 
             transactionService.save(transaction_to);
-          
+        
+        // Update user balances
             from_balance.setBalance(from_balance.getBalance() - amount);
 
             to_balance.setBalance(to_balance.getBalance() + amount);
           
             balanceService.save(from_balance);
+
             balanceService.save(to_balance);
 
             HashMap<String, String> response = new HashMap<String, String>();
@@ -125,7 +128,13 @@ public class TransactionController {
         return ResponseEntity.badRequest().body(response);
 
     }  catch(Exception e){
-        throw e;
+        HashMap<String, String> response = new HashMap<String, String>();
+        
+        response.put("status_code", "500");
+        
+        response.put("message", "Something went wrong, please try again later");
+
+        return ResponseEntity.badRequest().body(response);
         //return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
